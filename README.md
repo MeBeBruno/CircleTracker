@@ -1,4 +1,4 @@
-# CircleTracker&#x24B7;
+# Circle Tracker&#x24B7;
 
 <img src="https://img.shields.io/badge/Made with AI-333333" height="24rem"/>
 
