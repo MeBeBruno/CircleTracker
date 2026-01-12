@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="p-6 max-w-2xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-extrabold text-slate-800">Eintrag bearbeiten</h1>
+        <a href="{{ url_for('settings') }}" class="text-sm font-bold text-slate-400 hover:text-circle-500">Abbrechen</a>
+    </div>
+
+    <div class="bg-white rounded-[2rem] shadow-xl shadow-circle-100 p-6">
+        <div class="text-center mb-6">
+            <div class="inline-block bg-circle-100 text-circle-600 px-4 py-1 rounded-full text-sm font-bold">
+                {{ date.strftime('%d.%m.%Y') }}
+            </div>
+        </div>
+
+        <form method="POST">
+            <div class="space-y-6">
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-slate-50 rounded-2xl p-4">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Temp</label>
+                        <input type="number" step="0.01" name="temperature" value="{{ entry.temperature if entry and entry.temperature else '' }}" class="bg-transparent text-2xl font-black text-slate-700 w-full focus:outline-none">
+                    </div>
+                    <label class="bg-slate-50 rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer relative overflow-hidden">
+                        <input type="checkbox" name="intercourse" class="peer sr-only" {{ 'checked' if entry and entry.intercourse }}>
+                        <div class="absolute inset-0 bg-circle-100 opacity-0 peer-checked:opacity-100 transition"></div>
+                        <span class="text-2xl relative z-10">❤️</span>
+                        <span class="text-xs font-bold text-slate-400 mt-1 relative z-10 peer-checked:text-circle-600">Sex</span>
+                    </label>
+                </div>
+
+                <div class="bg-slate-50 rounded-2xl p-4">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase mb-3 block">Blutung</label>
+                    <div class="flex justify-between px-2">
+                        {% for val, label in [('none','✕'), ('spotting','Schmier'), ('light','Leicht'), ('medium','Mittel'), ('heavy','Stark')] %}
+                        <label class="cursor-pointer flex flex-col items-center">
+                            <input type="radio" name="bleeding" value="{{ val }}" class="peer sr-only" {{ 'checked' if (not entry and val=='none') or (entry and entry.bleeding == val) }}>
+                            <div class="w-8 h-8 rounded-full border-2 border-slate-200 flex items-center justify-center bg-white peer-checked:border-circle-500 peer-checked:bg-circle-100 transition text-xs font-bold text-slate-300 peer-checked:text-circle-600">
+                                {{label[0]}}
+                            </div>
+                            <span class="text-[9px] mt-1 text-slate-300 peer-checked:text-circle-500 font-bold">{{label}}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 rounded-2xl p-4">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase mb-3 block">Schleim</label>
+                    <div class="flex justify-between px-2">
+                        {% for code in ['t', 'Ø', 'f', 'S', 'S+'] %}
+                        <label class="cursor-pointer">
+                            <input type="radio" name="mucus" value="{{ code }}" class="peer sr-only" {{ 'checked' if entry and entry.mucus_code == code }}>
+                            <div class="w-10 h-10 rounded-full border-2 border-slate-200 flex items-center justify-center text-xs font-bold text-slate-300 peer-checked:bg-circle-500 peer-checked:text-white peer-checked:border-circle-500 transition">{{ code }}</div>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2">
+                    <select name="cervix_height" class="bg-slate-50 p-2 rounded-xl text-xs font-bold text-slate-600">
+                        <option value="">Lage...</option>
+                        <option value="Tief" {{ 'selected' if entry and entry.cervix_height == 'Tief' }}>Tief</option>
+                        <option value="Hoch" {{ 'selected' if entry and entry.cervix_height == 'Hoch' }}>Hoch</option>
+                    </select>
+                    <select name="cervix_openness" class="bg-slate-50 p-2 rounded-xl text-xs font-bold text-slate-600">
+                        <option value="">Öffnung...</option>
+                        <option value="Zu" {{ 'selected' if entry and entry.cervix_openness == 'Zu' }}>Zu</option>
+                        <option value="Offen" {{ 'selected' if entry and entry.cervix_openness == 'Offen' }}>Offen</option>
+                    </select>
+                    <select name="cervix_firmness" class="bg-slate-50 p-2 rounded-xl text-xs font-bold text-slate-600">
+                        <option value="">Härte...</option>
+                        <option value="Hart" {{ 'selected' if entry and entry.cervix_firmness == 'Hart' }}>Hart</option>
+                        <option value="Weich" {{ 'selected' if entry and entry.cervix_firmness == 'Weich' }}>Weich</option>
+                    </select>
+                </div>
+
+                <textarea name="notes" placeholder="Notizen..." class="w-full bg-slate-50 p-4 rounded-2xl text-sm font-medium focus:outline-none h-32">{{ entry.notes if entry and entry.notes else '' }}</textarea>
+
+                <button class="w-full bg-circle-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-circle-200 active:scale-95 transition">
+                    Änderungen speichern
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

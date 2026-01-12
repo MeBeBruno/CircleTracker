@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex flex-col justify-center min-h-screen p-6 max-w-md mx-auto">
+    
+    <div class="text-center mb-10">
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-[2rem] bg-white shadow-xl shadow-circle-100 mb-6 transform rotate-3 hover:rotate-6 transition duration-500">
+            <span class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-circle-500 to-circle-600">CT</span>
+        </div>
+        <h1 class="text-4xl font-black text-slate-800 tracking-tight mb-2">Willkommen</h1>
+        <p class="text-slate-400 font-bold">Melde dich bei CircleTracker an.</p>
+    </div>
+
+    <div class="bg-white/80 backdrop-blur-xl border border-white/50 rounded-[2.5rem] shadow-[0_20px_40px_-10px_rgba(244,63,94,0.15)] p-8">
+        <form method="POST">
+            
+            <div class="space-y-5 mb-8">
+                <div class="group">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-2">Dein Handle</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 font-bold">@</span>
+                        <input type="text" name="handle" placeholder="benutzername" 
+                               class="w-full bg-slate-50 hover:bg-white focus:bg-white p-4 pl-10 rounded-2xl text-slate-700 font-bold outline-none ring-2 ring-transparent focus:ring-circle-200 transition-all placeholder-slate-300 lowercase"
+                               autocapitalize="off" autocorrect="off" required>
+                    </div>
+                </div>
+
+                <div class="group">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-2">Passwort</label>
+                    <input type="password" name="password" placeholder="••••••••" 
+                           class="w-full bg-slate-50 hover:bg-white focus:bg-white p-4 rounded-2xl text-slate-700 font-bold outline-none ring-2 ring-transparent focus:ring-circle-200 transition-all placeholder-slate-300" 
+                           required>
+                </div>
+            </div>
+
+            <button class="w-full bg-gradient-to-r from-circle-500 to-circle-600 text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-circle-200 hover:shadow-circle-300 hover:scale-[1.02] active:scale-95 transition-all duration-300">
+                Los geht's
+            </button>
+
+        </form>
+
+        <div class="mt-8 text-center">
+            <p class="text-xs font-bold text-slate-400">Neu hier?</p>
+            <a href="{{ url_for('register') }}" class="text-circle-500 font-extrabold hover:text-circle-600 hover:underline transition">Kostenlos registrieren</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

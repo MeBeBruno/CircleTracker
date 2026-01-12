@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="p-6 lg:p-10 max-w-7xl mx-auto min-h-screen pb-32 lg:pb-10">
+    
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
+        <div>
+            <div class="flex items-center gap-3 group">
+                <h1 class="text-4xl font-black text-circle-800 tracking-tight">{{ current_user.name }}</h1>
+                <a href="{{ url_for('settings') }}" class="text-circle-300 group-hover:text-circle-500 transition-colors p-2 bg-white/50 rounded-full hover:bg-white" title="Einstellungen">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </a>
+            </div>
+            
+            <p class="text-sm font-bold text-circle-400 ml-1">@{{ current_user.handle }}</p>
+            
+            {% if not is_own_cycle %}
+                <span class="mt-3 inline-flex items-center gap-1.5 bg-white border border-circle-200 text-circle-600 px-3 py-1 rounded-full text-xs font-bold shadow-sm">
+                    <span>👁️</span> Ansicht: {{ user.name }}
+                </span>
+            {% endif %}
+        </div>
+
+        <div class="flex items-center gap-3 w-full md:w-auto">
+            <a href="webcal://{{ request.host }}{{ url_for('ical_feed', token=current_user.ical_token) }}" 
+               class="flex-1 md:flex-none justify-center flex items-center gap-2 bg-white border border-slate-200 text-slate-500 px-4 py-2.5 rounded-xl text-xs font-bold hover:border-circle-300 hover:text-circle-500 transition shadow-sm active:scale-95">
+               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+               Sync
+            </a>
+            
+            {% if current_user.partner %}
+                <a href="{{ url_for('dashboard', view='partner' if is_own_cycle else 'own') }}" 
+                   class="flex-1 md:flex-none justify-center bg-circle-500 text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-circle-200 hover:bg-circle-600 hover:scale-105 active:scale-95 transition flex items-center gap-2">
+                   {{ 'Zu @' + current_user.partner.handle if is_own_cycle else 'Zu Mir' }}
+                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        
+        <div class="lg:col-span-2 space-y-8 flex flex-col h-full">
+            
+            <div class="relative bg-white rounded-[2.5rem] shadow-glass p-8 md:p-12 text-center group transition-all duration-500 hover:shadow-xl flex flex-col justify-center items-center min-h-[300px]">
+                <div class="absolute top-0 left-0 w-full h-3 transition-colors duration-500 {{ 'bg-green-400' if is_safe else 'bg-circle-500' }}"></div>
+                
+                <div class="mb-6">
+                    <span class="inline-block px-5 py-2 rounded-full text-xs font-black tracking-widest uppercase transition-colors duration-500 shadow-sm
+                                 {{ 'bg-green-100 text-green-600' if is_safe else 'bg-circle-50 text-circle-500' }}">
+                        {{ 'Unfruchtbar' if is_safe else 'Fruchtbar' }}
+                    </span>
+                </div>
+                
+                {% set zt = (today - cycle.start_date).days + 1 %}
+                <div class="relative inline-block mb-1">
+                    <h2 class="text-8xl md:text-9xl font-black text-slate-800 leading-none tracking-tighter">{{ zt }}</h2>
+                    <span class="absolute -right-6 top-2 text-2xl animate-pulse text-circle-400">.</span>
+                </div>
+                <p class="text-slate-400 font-bold uppercase text-xs tracking-[0.3em] mb-8">Zyklustag</p>
+
+                {% if status.ehM_day %}
+                    <div class="pt-6 border-t border-slate-50 w-full flex justify-center gap-16">
+                        <div class="text-center">
+                            <span class="block text-[9px] font-black text-circle-300 uppercase tracking-wider mb-1">ehM</span>
+                            <span class="text-xl font-bold text-slate-600">{{ status.ehM_day.strftime('%d.%m') }}</span>
+                        </div>
+                        <div class="text-center">
+                            <span class="block text-[9px] font-black text-circle-300 uppercase tracking-wider mb-1">Ziel</span>
+                            <span class="text-xl font-bold text-slate-600">{{ status.coverline }}°C</span>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="bg-white rounded-[2.5rem] shadow-glass p-6 h-80 relative">
+                <canvas id="cycleChart"></canvas>
+            </div>
+        </div>
+
+        <div class="lg:col-span-1">
+            {% if is_own_cycle %}
+            
+            <div class="
+                fixed bottom-0 left-0 right-0 z-50 
+                bg-white/95 backdrop-blur-xl border-t border-slate-100
+                rounded-t-[2.5rem] shadow-[0_-10px_40px_-10px_rgba(0,0,0,0.1)] p-6 pb-8
+                lg:relative lg:border-none lg:rounded-[2.5rem] lg:shadow-glass lg:p-8 lg:z-0
+                transition-transform duration-300 ease-out"
+                x-data="{ tab: 'basis' }">
+                
+                <form action="{{ url_for('add_entry') }}" method="POST">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-black text-slate-800">Tages-Log</h3>
+                        <button type="submit" class="bg-circle-500 hover:bg-circle-600 text-white px-8 py-3 rounded-2xl font-bold shadow-lg shadow-circle-200 active:scale-95 transition-all">
+                            Speichern
+                        </button>
+                    </div>
+
+                    <div class="flex p-1.5 bg-slate-50 rounded-2xl mb-8 border border-slate-100">
+                        <button type="button" @click="tab = 'basis'" :class="tab === 'basis' ? 'bg-white shadow-sm text-circle-600' : 'text-slate-400 hover:text-slate-600'" class="flex-1 py-2.5 text-xs font-bold rounded-xl transition-all">Basis</button>
+                        <button type="button" @click="tab = 'cervix'" :class="tab === 'cervix' ? 'bg-white shadow-sm text-circle-600' : 'text-slate-400 hover:text-slate-600'" class="flex-1 py-2.5 text-xs font-bold rounded-xl transition-all">Zervix</button>
+                        <button type="button" @click="tab = 'body'" :class="tab === 'body' ? 'bg-white shadow-sm text-circle-600' : 'text-slate-400 hover:text-slate-600'" class="flex-1 py-2.5 text-xs font-bold rounded-xl transition-all">Körper</button>
+                    </div>
+
+                    <div x-show="tab === 'basis'" class="space-y-6 animate-fadeIn">
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-slate-50 rounded-3xl p-5 flex flex-col justify-center relative group focus-within:ring-2 focus-within:ring-circle-100 transition border border-transparent focus-within:border-circle-200 focus-within:bg-white">
+                                <label class="text-[9px] font-black text-slate-300 uppercase tracking-wider mb-1 pl-1">Temperatur</label>
+                                <div class="flex items-baseline">
+                                    <input type="number" step="0.01" name="temperature" placeholder="-" value="{{ today_log.temperature if today_log and today_log.temperature else '' }}" 
+                                           class="bg-transparent text-3xl font-black text-slate-700 w-full focus:outline-none placeholder-slate-200 leading-none">
+                                    <span class="text-xs font-bold text-slate-300 ml-1">°C</span>
+                                </div>
+                            </div>
+                            
+                            <label class="bg-slate-50 rounded-3xl p-4 flex flex-col items-center justify-center cursor-pointer relative overflow-hidden group select-none border border-transparent hover:border-circle-100 hover:bg-white transition-all">
+                                <input type="checkbox" name="intercourse" class="peer sr-only" {{ 'checked' if today_log and today_log.intercourse }}>
+                                <div class="absolute inset-0 bg-circle-50 opacity-0 peer-checked:opacity-100 transition duration-500"></div>
+                                <span class="text-4xl relative z-10 transition transform peer-checked:scale-110 group-active:scale-90 grayscale peer-checked:grayscale-0 drop-shadow-sm peer-checked:drop-shadow-md">❤️</span>
+                                <span class="text-[9px] font-black text-slate-300 mt-2 relative z-10 peer-checked:text-circle-600 uppercase tracking-wider">Intimität</span>
+                            </label>
+                        </div>
+
+                        <div class="bg-slate-50 rounded-3xl p-5 border border-transparent hover:border-circle-100 transition-colors">
+                            <label class="text-[9px] font-black text-slate-300 uppercase tracking-wider mb-4 block text-center">Blutung</label>
+                            <div class="flex justify-between items-end px-2">
+                                {% for val, label, size, col in [
+                                    ('none','Keine','w-6 h-6','slate'), 
+                                    ('spotting','Schmier','w-6 h-6','circle-300'), 
+                                    ('light','Leicht','w-2 h-2','circle-400'), 
+                                    ('medium','Mittel','w-3 h-3','circle-500'), 
+                                    ('heavy','Stark','w-4 h-4','circle-600')] 
+                                %}
+                                <label class="cursor-pointer flex flex-col items-center gap-2 group">
+                                    <input type="radio" name="bleeding" value="{{ val }}" class="peer sr-only" {{ 'checked' if (not today_log and val=='none') or (today_log and today_log.bleeding == val) }}>
+                                    <div class="w-10 h-10 rounded-full border-2 border-transparent bg-white flex items-center justify-center shadow-sm peer-checked:border-circle-500 peer-checked:shadow-md peer-checked:scale-110 transition-all duration-300">
+                                        {% if val == 'none' %}
+                                            <span class="text-slate-300 font-bold text-sm group-hover:text-slate-400">✕</span>
+                                        {% else %}
+                                            <div class="{{size}} rounded-full {{ 'bg-'+col if 'bg' not in col else col }}"></div>
+                                        {% endif %}
+                                    </div>
+                                    <span class="text-[9px] font-bold text-slate-300 peer-checked:text-circle-500 transition-colors">{{label}}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 rounded-3xl p-5 border border-transparent hover:border-circle-100 transition-colors">
+                            <label class="text-[9px] font-black text-slate-300 uppercase tracking-wider mb-4 block text-center">Schleim</label>
+                            <div class="flex justify-between items-center px-2">
+                                {% for code in ['t', 'Ø', 'f', 'S', 'S+'] %}
+                                <label class="cursor-pointer group">
+                                    <input type="radio" name="mucus" value="{{ code }}" class="peer sr-only" {{ 'checked' if today_log and today_log.mucus_code == code }}>
+                                    <div class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-xs font-bold text-slate-400 border-2 border-transparent peer-checked:bg-circle-500 peer-checked:text-white peer-checked:border-circle-300 peer-checked:scale-110 transition-all duration-300 group-hover:border-slate-200">
+                                        {{ code }}
+                                    </div>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div x-show="tab === 'cervix'" class="space-y-4 animate-fadeIn">
+                        <div class="bg-slate-50 rounded-3xl p-6 space-y-6">
+                            {% for field, title, options in [
+                                ('cervix_height', 'Lage', ['Tief', 'Hoch']),
+                                ('cervix_openness', 'Öffnung', ['Zu', 'Offen']),
+                                ('cervix_firmness', 'Festigkeit', ['Hart', 'Weich'])
+                            ] %}
+                            <div>
+                                <label class="text-[9px] font-black text-slate-300 uppercase tracking-wider mb-3 block pl-1">{{ title }}</label>
+                                <div class="flex bg-white rounded-xl p-1.5 shadow-sm">
+                                    {% for opt in options %}
+                                    <label class="flex-1 cursor-pointer">
+                                        <input type="radio" name="{{field}}" value="{{opt}}" class="peer sr-only" {{ 'checked' if today_log and today_log[field] == opt }}>
+                                        <div class="py-2.5 text-center rounded-lg text-xs font-bold text-slate-400 peer-checked:bg-circle-50 peer-checked:text-circle-600 peer-checked:shadow-sm transition-all hover:bg-slate-50">
+                                            {{ opt }}
+                                        </div>
+                                    </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div x-show="tab === 'body'" class="space-y-4 animate-fadeIn">
+                        <div class="max-h-[350px] overflow-y-auto pr-2 space-y-5 custom-scrollbar">
+                            
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-slate-50 p-4 rounded-3xl border border-transparent focus-within:border-circle-100 focus-within:bg-white transition-colors">
+                                    <label class="text-[9px] font-black text-slate-300 uppercase block mb-2 pl-1">LH Test</label>
+                                    <select name="test_lh" class="w-full bg-white rounded-xl text-xs p-3 font-bold text-slate-600 focus:outline-none focus:ring-2 focus:ring-circle-100 shadow-sm appearance-none cursor-pointer">
+                                        <option value="">Nicht getestet</option>
+                                        <option value="Pos" {{ 'selected' if today_log and today_log.test_lh == 'Pos' }}>Positiv (+)</option>
+                                        <option value="Neg" {{ 'selected' if today_log and today_log.test_lh == 'Neg' }}>Negativ (-)</option>
+                                    </select>
+                                </div>
+                                <div class="bg-slate-50 p-4 rounded-3xl border border-transparent focus-within:border-circle-100 focus-within:bg-white transition-colors">
+                                    <label class="text-[9px] font-black text-slate-300 uppercase block mb-2 pl-1">SST</label>
+                                    <select name="test_pregnancy" class="w-full bg-white rounded-xl text-xs p-3 font-bold text-slate-600 focus:outline-none focus:ring-2 focus:ring-circle-100 shadow-sm appearance-none cursor-pointer">
+                                        <option value="">Nicht getestet</option>
+                                        <option value="Pos" {{ 'selected' if today_log and today_log.test_pregnancy == 'Pos' }}>Positiv (+)</option>
+                                        <option value="Neg" {{ 'selected' if today_log and today_log.test_pregnancy == 'Neg' }}>Negativ (-)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="text-[9px] font-black text-slate-300 uppercase block mb-3 pl-1">Symptome</label>
+                                <div class="flex flex-wrap gap-2">
+                                    {% for field, label in [('pain_mittelschmerz','⚡ Eisprung'), ('pain_period','🩸 Krämpfe'), ('pain_headache','🧠 Kopfweh'), ('breast_symptom','🍒 Brust')] %}
+                                    <label class="cursor-pointer group">
+                                        <input type="checkbox" name="{{field}}" class="peer sr-only" {{ 'checked' if today_log and today_log[field] }}>
+                                        <div class="px-4 py-2.5 rounded-2xl border border-slate-100 text-xs font-bold text-slate-400 bg-white shadow-sm peer-checked:bg-circle-500 peer-checked:text-white peer-checked:border-circle-500 peer-checked:shadow-md transition-all group-hover:border-circle-200">
+                                            {{label}}
+                                        </div>
+                                    </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-50 p-5 rounded-3xl">
+                                <label class="text-[9px] font-black text-slate-300 uppercase block mb-3 text-center">Stimmung</label>
+                                <div class="flex justify-between px-2">
+                                    {% for v, emoji in [('Happy','😊'), ('Sad','😢'), ('Irritable','😠'), ('Anxious','😰'), ('Neutral','😐')] %}
+                                    <label class="cursor-pointer opacity-40 hover:opacity-100 peer-checked:opacity-100 transition-all grayscale peer-checked:grayscale-0 peer-checked:scale-125">
+                                        <input type="radio" name="mood" value="{{v}}" class="peer sr-only" {{ 'checked' if today_log and today_log.mood == v }}>
+                                        <span class="text-3xl">{{emoji}}</span>
+                                    </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <textarea name="notes" placeholder="Tippe für Notizen..." class="w-full bg-slate-50 p-4 rounded-2xl text-xs font-bold text-slate-600 focus:outline-none focus:bg-white focus:ring-2 focus:ring-circle-100 resize-none h-24 placeholder-slate-300 transition-colors">{{ today_log.notes if today_log and today_log.notes else '' }}</textarea>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            
+            {% if not current_user.partner %}
+            <div class="mt-8 hidden lg:block p-8 bg-white/50 rounded-[2.5rem] border border-white text-center shadow-sm">
+                <div class="inline-block p-3 bg-circle-50 rounded-full text-2xl mb-3">🤝</div>
+                <h4 class="font-bold text-slate-700 mb-4">Tracking teilen?</h4>
+                <form action="{{ url_for('connect_partner') }}" method="POST" class="flex gap-2">
+                    <input type="text" name="partner_handle" placeholder="Partner Handle" class="flex-1 bg-white p-3 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-circle-100 lowercase shadow-sm placeholder-slate-300 border border-slate-100">
+                    <button class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl font-bold text-xs transition shadow-lg shadow-slate-200">Add</button>
+                </form>
+            </div>
+            {% endif %}
+
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="h-24 lg:hidden"></div>
+
+</div>
+
+<script>
+    const ctx = document.getElementById('cycleChart').getContext('2d');
+    const labels = {{ chart_labels | tojson }};
+    const temps = {{ chart_temps | tojson }};
+
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(244, 63, 94, 0.2)'); 
+    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Temperatur',
+                data: temps,
+                borderColor: '#f43f5e',
+                backgroundColor: gradient,
+                borderWidth: 3,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#f43f5e',
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                pointBorderWidth: 2,
+                tension: 0.4, 
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    min: 35.80,
+                    max: 37.50,
+                    grid: { color: '#f1f5f9', drawBorder: false },
+                    ticks: { font: { family: 'Nunito', weight: 'bold', size: 10 }, color: '#cbd5e1' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { family: 'Nunito', weight: 'bold', size: 10 }, color: '#cbd5e1', maxTicksLimit: 7 }
+                }
+            },
+            plugins: { legend: { display: false } }
+        }
+    });
+</script>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #fecdd3; border-radius: 20px; }
+    .animate-fadeIn { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+{% endblock %}

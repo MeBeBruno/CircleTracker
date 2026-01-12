@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="p-6 max-w-4xl mx-auto" x-data="{ tab: 'account' }">
+    
+    <div class="mb-8 flex items-end justify-between">
+        <h1 class="text-3xl font-extrabold text-circle-800">Verwaltung</h1>
+        <a href="{{ url_for('dashboard') }}" class="text-sm font-bold text-circle-500 hover:underline">Zurück</a>
+    </div>
+
+    <div class="flex p-1 bg-white rounded-xl mb-6 shadow-sm overflow-x-auto">
+        <button @click="tab = 'account'" :class="tab === 'account' ? 'bg-circle-100 text-circle-700' : 'text-slate-400'" class="flex-1 px-4 py-2 text-sm font-bold rounded-lg transition whitespace-nowrap">Account</button>
+        <button @click="tab = 'sessions'" :class="tab === 'sessions' ? 'bg-circle-100 text-circle-700' : 'text-slate-400'" class="flex-1 px-4 py-2 text-sm font-bold rounded-lg transition whitespace-nowrap">Geräte ({{ sessions|length }})</button>
+        <button @click="tab = 'data'" :class="tab === 'data' ? 'bg-circle-100 text-circle-700' : 'text-slate-400'" class="flex-1 px-4 py-2 text-sm font-bold rounded-lg transition whitespace-nowrap">Daten</button>
+    </div>
+
+    <div x-show="tab === 'account'" class="space-y-6">
+        <div class="glass-card p-6 rounded-3xl">
+            <h3 class="text-lg font-bold text-slate-700 mb-4">Profil</h3>
+            <form action="{{ url_for('update_account') }}" method="POST" class="flex gap-4">
+                <div class="flex-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Name</label>
+                    <input type="text" name="name" value="{{ current_user.name }}" class="w-full bg-slate-50 p-3 rounded-xl font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-circle-200">
+                </div>
+                <div class="flex items-end">
+                    <button class="bg-circle-500 text-white px-6 py-3 rounded-xl font-bold shadow-md hover:bg-circle-600 transition">Speichern</button>
+                </div>
+            </form>
+            <div class="mt-4 pt-4 border-t border-slate-100">
+                <label class="text-[10px] font-bold text-slate-400 uppercase">Dein Handle (User-ID)</label>
+                <p class="font-mono text-slate-600 bg-slate-50 p-2 rounded-lg inline-block">@{{ current_user.handle }}</p>
+            </div>
+        </div>
+
+        <div class="border-2 border-red-100 bg-white p-6 rounded-3xl">
+            <h3 class="text-lg font-bold text-red-500 mb-2">Gefahrenzone</h3>
+            <p class="text-sm text-slate-400 mb-4">Dieser Schritt löscht deinen Account und alle Daten unwiderruflich.</p>
+            <form action="{{ url_for('delete_account') }}" method="POST" class="flex gap-2">
+                <input type="text" name="confirm" placeholder="Schreibe DELETE" class="bg-red-50 p-3 rounded-xl font-bold text-red-500 focus:outline-none placeholder-red-200 w-32">
+                <button class="bg-red-500 text-white px-4 py-3 rounded-xl font-bold hover:bg-red-600 transition">Account löschen</button>
+            </form>
+        </div>
+    </div>
+
+    <div x-show="tab === 'sessions'" class="space-y-4">
+        <div class="glass-card p-6 rounded-3xl">
+            <h3 class="text-lg font-bold text-slate-700 mb-4">Verbundene Geräte</h3>
+            <div class="space-y-3">
+                {% for s in sessions %}
+                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border {{ 'border-circle-300 bg-circle-50' if s.session_token == current_token else 'border-transparent' }}">
+                    <div>
+                        <div class="font-bold text-sm text-slate-700 truncate max-w-[200px] sm:max-w-md">{{ s.user_agent }}</div>
+                        <div class="text-xs text-slate-400 mt-1">
+                            IP: {{ s.ip_address }} • Aktiv: {{ s.last_active.strftime('%d.%m.%Y %H:%M') }}
+                            {% if s.session_token == current_token %}
+                            <span class="ml-2 text-circle-500 font-bold">(Dieses Gerät)</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if s.session_token != current_token %}
+                    <a href="{{ url_for('revoke_session', session_id=s.id) }}" class="bg-slate-200 text-slate-500 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-100 hover:text-red-500 transition">Logout</a>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div x-show="tab === 'data'" class="space-y-6">
+        
+        <div class="glass-card p-6 rounded-3xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-slate-700">Einträge ({{ entries|length }})</h3>
+                <div class="text-xs text-slate-400">Neueste zuerst</div>
+            </div>
+            
+            <div class="max-h-96 overflow-y-auto space-y-2 pr-2">
+                {% for entry in entries %}
+                <div class="flex items-center justify-between p-3 bg-white rounded-xl shadow-sm hover:shadow-md transition">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-circle-100 text-circle-600 w-10 h-10 rounded-lg flex items-center justify-center font-bold text-xs flex-col leading-none">
+                            <span>{{ entry.date.strftime('%d') }}</span>
+                            <span class="text-[9px] uppercase">{{ entry.date.strftime('%b') }}</span>
+                        </div>
+                        <div>
+                            <div class="text-sm font-bold text-slate-700">
+                                {% if entry.temperature %}Temp: {{ entry.temperature }}{% endif %}
+                                {% if entry.intercourse %}❤️{% endif %}
+                                {% if entry.bleeding and entry.bleeding != 'none' %}🩸{% endif %}
+                            </div>
+                            <div class="text-xs text-slate-400 truncate max-w-[150px]">
+                                {{ entry.notes if entry.notes else 'Keine Notizen' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <a href="{{ url_for('edit_entry', date_str=entry.date) }}" class="p-2 text-slate-400 hover:text-circle-500">✏️</a>
+                        <a href="{{ url_for('delete_entry', entry_id=entry.id) }}" onclick="return confirm('Wirklich löschen?')" class="p-2 text-slate-400 hover:text-red-500">🗑️</a>
+                    </div>
+                </div>
+                {% endfor %}
+                {% if entries|length == 0 %}
+                <div class="text-center text-slate-400 py-8">Noch keine Daten vorhanden.</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="border-2 border-red-100 bg-white p-6 rounded-3xl">
+            <h3 class="text-lg font-bold text-red-500 mb-2">Daten löschen</h3>
+            <p class="text-sm text-slate-400 mb-4">Alle Zyklustage und Einträge löschen (Account bleibt bestehen).</p>
+            <form action="{{ url_for('delete_all_data') }}" method="POST" class="flex gap-2">
+                <input type="text" name="confirm_bulk" placeholder="Schreibe WIPE" class="bg-red-50 p-3 rounded-xl font-bold text-red-500 focus:outline-none placeholder-red-200 w-32">
+                <button class="bg-red-500 text-white px-4 py-3 rounded-xl font-bold hover:bg-red-600 transition">Alle Daten löschen</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

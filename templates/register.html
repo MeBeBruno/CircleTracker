@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex flex-col justify-center min-h-screen p-6 max-w-md mx-auto">
+    
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-black text-slate-800 tracking-tight">Account erstellen</h1>
+        <p class="text-slate-400 font-bold text-sm mt-1">Sicher, privat & lokal verschlüsselt.</p>
+    </div>
+
+    <div class="bg-white/80 backdrop-blur-xl border border-white/50 rounded-[2.5rem] shadow-[0_20px_40px_-10px_rgba(244,63,94,0.15)] p-8">
+        <form method="POST">
+            
+            <div class="space-y-5 mb-8">
+                
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-2">Wie heißt du?</label>
+                    <input type="text" name="name" placeholder="Dein Name" 
+                           class="w-full bg-slate-50 hover:bg-white focus:bg-white p-4 rounded-2xl text-slate-700 font-bold outline-none ring-2 ring-transparent focus:ring-circle-200 transition-all placeholder-slate-300"
+                           required>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-2">Wähle ein Handle</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 font-bold">@</span>
+                        <input type="text" name="handle" placeholder="anna.99" 
+                               class="w-full bg-slate-50 hover:bg-white focus:bg-white p-4 pl-10 rounded-2xl text-slate-700 font-bold outline-none ring-2 ring-transparent focus:ring-circle-200 transition-all placeholder-slate-300 lowercase"
+                               autocapitalize="off" autocorrect="off" required>
+                    </div>
+                    <p class="text-[10px] text-slate-400 font-bold mt-2 ml-2 leading-tight opacity-70">
+                        3-16 Zeichen. Nur a-z, 0-9, Punkt & Bindestrich.
+                    </p>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-2">Passwort</label>
+                    <input type="password" name="password" placeholder="••••••••" 
+                           class="w-full bg-slate-50 hover:bg-white focus:bg-white p-4 rounded-2xl text-slate-700 font-bold outline-none ring-2 ring-transparent focus:ring-circle-200 transition-all placeholder-slate-300"
+                           required>
+                </div>
+
+            </div>
+
+            <button class="w-full bg-circle-500 text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-circle-200 hover:bg-circle-600 hover:scale-[1.02] active:scale-95 transition-all duration-300">
+                Registrieren
+            </button>
+
+        </form>
+
+        <div class="mt-8 text-center">
+            <a href="{{ url_for('login') }}" class="text-sm font-bold text-slate-400 hover:text-circle-500 transition">Zurück zum Login</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
