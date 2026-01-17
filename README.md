@@ -4,5 +4,5 @@
 
 > A scientifically based menstrual cycle tracker with comprehensive capabilities 📅
 
-Database: [Neon](neon.tech)
-Web App: [Render](render.com)
+Database: [Neon](https://neon.tech)
+Web App: [Render](https://render.com)
